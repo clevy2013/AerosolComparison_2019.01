@@ -108,10 +108,48 @@ plt.savefig('{plt_name}.png'.format(plt_name=plt_name))
 # adjusted to make for a decent visualization.. right now everything looks like 0 density
 # other than the x=y line
 
-#heatmap, xedges, yedges = np.histogram2d(x, y, bins=50, range=[[0, 1000], [0, 1000]])
-#extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
-#plt.imshow(heatmap.T, extent=extent, origin='lower', cmap=cm.Reds)
-#plt.savefig('{plt_name}_heatmap.png'.format(plt_name=plt_name))
+#Using masked numpy arrays, create scatterplot of tile1 vs tile2
+plt.ion()
+fig = plt.figure()
+#fig.suptitle(tile1_fname_wsa ' vs ' tile2_fname_wsa)
+ax = fig.add_subplot(111)
+#fig.subplots_adjust(top=0.85)
+
+ax.set_title('White Sky Albedo Comparison')
+ax.set_xlabel(tile1_fname_wsa + ' (scaled)')
+ax.set_ylabel(tile2_fname_wsa + ' (scaled)')
+plt.xlim(0.0, 1000)
+plt.ylim(0.0, 1000)
+textstr = '\n'.join((
+            r'$\mathrm{RMSE}=%.2f$' % (rmse, ),
+                    r'$\mathrm{Mean Bias}=%.2f$' % (mb, )))
+
+props = dict(boxstyle='round', facecolor='white', alpha=0.5)
+ax.text(0.05, 0.95, textstr, transform=ax.transAxes, fontsize=14, verticalalignment='top', bbox=props)
+
+
+xedges = range(0,1000,20)
+yedges = range(0,1000,20)
+
+heatmap, xedges, yedges = np.histogram2d(x, y, bins=(xedges, yedges), range=[[0,1],[0,1]])
+extent = [xedges[0], xedges[-1], yedges[0], yedges[-1]]
+plt.imshow(heatmap.T, origin='lowest',  extent=extent, cmap=cm.Reds, zorder=0)
+
+#ax.plot(cmb_data[:,0], cmb_data[:,1] ,marker=',',color='b',alpha=.5, markersize=.8, linestyle="None")
+# Add x=y line
+lims = [
+                np.min([ax.get_xlim(), ax.get_ylim()]),  # min of both axes
+                np.max([ax.get_xlim(), ax.get_ylim()]),  # max of both axes
+                            ]
+
+# now plot both limits against eachother
+ax.plot(lims, lims, 'k-', zorder=1)
+ax.set_aspect('equal')
+ax.set_xlim(lims)
+ax.set_ylim(lims)
+
+plt.savefig('{plt_name}_heatmap.png' .format(plt_name=plt_name))
 
 # Export data as CSV in case needed
 np.savetxt(short_name + 'test_data.csv', cmb_data, delimiter=",")
+                                                                                                                                                      138,1         Bo
